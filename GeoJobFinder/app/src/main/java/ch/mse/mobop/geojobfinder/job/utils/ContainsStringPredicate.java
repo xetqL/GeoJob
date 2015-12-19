@@ -11,7 +11,7 @@ public class ContainsStringPredicate implements Predicate<String>{
     }
 
     @Override
-    public boolean matchPredicate(String text) {
-        return text.contains(willBeCheckedInString);
+    public boolean matchPredicate(String value) {
+        return value.contains(willBeCheckedInString);
     }
 }
