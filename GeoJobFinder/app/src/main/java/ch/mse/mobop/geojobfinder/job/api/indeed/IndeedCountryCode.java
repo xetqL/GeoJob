@@ -1,12 +1,22 @@
 package ch.mse.mobop.geojobfinder.job.api.indeed;
 
 
+import android.content.Context;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.util.Log;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
 import ch.mse.mobop.geojobfinder.job.api.CountryCode;
 
 /**
  * Created by xetqL on 19/12/2015.
  */
-public enum IndeedCountryCode implements CountryCode{
+public enum IndeedCountryCode implements CountryCode {
     US("United States"),
     AR("Argentina"),
     AU("Australia"),
