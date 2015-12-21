@@ -66,4 +66,13 @@ public class CompleteLocation {
     public LatLng toLatLng(){
         return new LatLng(gpsLocation.getLatitude(), gpsLocation.getLongitude());
     }
+
+    @Override
+    public String toString() {
+        return "CompleteLocation{" +
+                "gpsLocation=" + gpsLocation.toString() +
+                ", countryCode=" + countryCode +
+                ", city='" + city + '\'' +
+                '}';
+    }
 }

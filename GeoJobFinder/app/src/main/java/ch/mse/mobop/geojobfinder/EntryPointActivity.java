@@ -90,8 +90,8 @@ public class EntryPointActivity extends AppCompatActivity implements OnMapReadyC
                     if(lon != 0 && lat != 0) {
                         mapFragment.getMap().moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat,lon), 10f));
                         JobAPI indeedAPI = new IndeedJobAPI();
-                        JobRequest req = (JobRequest) IndeedJobRequestBuilder.create(currentLoc, indeedAPI.developerKey).build();
-                        new APIRequestExecutor(mapFragment).execute(new Tuple<>(indeedAPI, req));
+                        JobRequest req = (JobRequest) IndeedJobRequestBuilder.create(currentLoc, indeedAPI.developerKey).withLimit(100).build();
+                        new APIRequestExecutor(getApplicationContext(), mapFragment).execute(new Tuple<>(indeedAPI, req));
                     }
 
                 } catch (Exception e) {

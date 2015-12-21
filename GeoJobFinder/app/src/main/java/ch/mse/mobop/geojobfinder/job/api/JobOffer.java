@@ -3,26 +3,31 @@ package ch.mse.mobop.geojobfinder.job.api;
 import android.location.Location;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.android.clustering.ClusterItem;
 
 import java.net.URL;
 
 /**
  * Created by xetqL on 19/12/2015.
  */
-public interface JobOffer {
+public abstract class JobOffer implements ClusterItem{
 
-    String getJobTitle();
+    public abstract String getJobTitle();
 
-    Location getGPSLocation(); //get the GPS coordinate as LAT;LON
+    public abstract Location getGPSLocation(); //get the GPS coordinate as LAT;LON
 
-    CountryCode getCountry();
+    public abstract CountryCode getCountry();
 
-    LatLng getLocationAsLatLng();
+    public abstract LatLng getLocationAsLatLng(double offsetX, double offsetY);
 
-    boolean isInCountry(CountryCode country);
+    public abstract LatLng getLocationAsLatLng();
 
-    String getAPILocation(); //get the name of the api that has the job offer
 
-    URL getProposalURL();
+    public abstract boolean isInCountry(CountryCode country);
 
+    public abstract String getAPILocation(); //get the name of the api that has the job offer
+
+    public abstract URL getProposalURL();
+
+    public abstract LatLng getPosition();
 }
