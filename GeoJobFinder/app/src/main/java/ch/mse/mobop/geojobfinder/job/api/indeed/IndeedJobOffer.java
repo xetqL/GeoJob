@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.UUID;
 
 import ch.mse.mobop.geojobfinder.job.api.CountryCode;
 import ch.mse.mobop.geojobfinder.job.api.JobOffer;
@@ -24,61 +25,16 @@ import ch.mse.mobop.geojobfinder.job.api.CompleteLocation;
  * Created by xetqL on 21/12/2015.
  */
 public class IndeedJobOffer extends JobOffer{
-    private final CompleteLocation location;
-    private final String jobTitle, apiLocation = "indeed", snippet;
-    private final URL proposalURL;
+    private final String apiLocation = "indeed";
 
-    private IndeedJobOffer(CompleteLocation location, String jobTitle, String snippet, String proposalURL) throws MalformedURLException {
-        this.location = location;
-        this.jobTitle = jobTitle;
-        this.proposalURL = new URL(proposalURL);
-        this.snippet = snippet;
-    }
-
-    @Override
-    public String getJobTitle() {
-        return jobTitle;
-    }
-
-    @Override
-    public Location getGPSLocation() {
-        return location.getGpsLocation();
-    }
-
-    @Override
-    public CountryCode getCountry() {
-        return location.getCountryCode();
-    }
-
-    @Override
-    public LatLng getLocationAsLatLng() {
-        return location.toLatLng();
-    }
-
-    @Override
-    public LatLng getLocationAsLatLng(double offsetX, double offsetY) {
-        return new LatLng(
-                location.getGpsLocation().getLatitude() + offsetX,
-                location.getGpsLocation().getLongitude() + offsetY
-        );
-    }
-
-    @Override
-    public boolean isInCountry(CountryCode country) {
-        return location.getCountryCode() == country;
+    private IndeedJobOffer(String jobKey, CompleteLocation location, String jobTitle, String snippet, String proposalURL, String company) throws MalformedURLException {
+        super(UUID.randomUUID(), jobKey, jobTitle, company, location, snippet, new URL(proposalURL));
     }
 
     @Override
     public String getAPILocation() {
         return "indeed";
     }
-
-    @Override
-    public URL getProposalURL() {
-        return proposalURL;
-    }
-
-
 
     public static JobOffer buildFromAPIResponse(String rawResponse) throws IOException, JSONException {
         JobOffer res = null;
@@ -92,10 +48,12 @@ public class IndeedJobOffer extends JobOffer{
         loc.setLatitude(lat);
 
         res = new IndeedJobOffer(
+                response.getString("jobkey"),
                 CompleteLocation.buildFromValue(loc, APIResponsesUtils.decode(response.getString("city")), IndeedCountryCode.valueOf(response.getString("country"))),
                 response.getString("jobtitle"),
                 response.getString("url"),
-                response.getString("snippet")
+                response.getString("snippet"),
+                response.getString("source")
         );
         return res;
     }
@@ -110,10 +68,12 @@ public class IndeedJobOffer extends JobOffer{
         loc.setLatitude(lat);
 
         res = new IndeedJobOffer(
+                response.getString("jobkey"),
                 CompleteLocation.buildFromValue(loc, APIResponsesUtils.decode(response.getString("city")), IndeedCountryCode.valueOf(response.getString("country"))),
                 response.getString("jobtitle"),
                 response.getString("snippet"),
-                response.getString("url")
+                response.getString("url"),
+                response.getString("source")
         );
 
         return res;
@@ -126,12 +86,18 @@ public class IndeedJobOffer extends JobOffer{
     }
 
     @Override
+    public String getSnippet() {
+        return snippet;
+    }
+
+    @Override
     public String toString() {
         return "IndeedJobOffer{" +
-                "location=" + location.toString() +
-                ", JobTitle='" + jobTitle + '\'' +
+                "location=" + location +
+                ", jobTitle='" + jobTitle + '\'' +
                 ", apiLocation='" + apiLocation + '\'' +
-                ", snippet='" + snippet.substring(0, 40) + '\'' +
+                ", snippet='" + snippet + '\'' +
+                ", company='" + company + '\'' +
                 ", proposalURL=" + proposalURL +
                 '}';
     }

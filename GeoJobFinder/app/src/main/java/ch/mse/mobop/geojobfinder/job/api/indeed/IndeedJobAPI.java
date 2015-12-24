@@ -116,4 +116,9 @@ public class IndeedJobAPI extends JobAPI {
         return response;
     }
 
+    @Override
+    protected List<JobOffer> getEmptyJobList() {
+        return new ArrayList<>();
+    }
+
 }

@@ -2,6 +2,7 @@ package ch.mse.mobop.geojobfinder;
 
 import android.content.Context;
 
+import android.content.Intent;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -19,29 +20,27 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.util.List;
-import java.util.Locale;
+import java.util.HashMap;
+import java.util.Map;
 
 import ch.mse.mobop.geojobfinder.job.api.APIRequestExecutor;
-import ch.mse.mobop.geojobfinder.job.api.CountryCode;
 import ch.mse.mobop.geojobfinder.job.api.JobAPI;
 import ch.mse.mobop.geojobfinder.job.api.JobOffer;
 import ch.mse.mobop.geojobfinder.job.api.JobRequest;
-import ch.mse.mobop.geojobfinder.job.api.JobRequestBuilder;
-import ch.mse.mobop.geojobfinder.job.api.Tuple;
+import ch.mse.mobop.geojobfinder.job.api.StoreJobOfferComponent;
+import ch.mse.mobop.geojobfinder.job.utils.Tuple;
 import ch.mse.mobop.geojobfinder.job.api.indeed.IndeedCountryCode;
 import ch.mse.mobop.geojobfinder.job.api.indeed.IndeedJobAPI;
 import ch.mse.mobop.geojobfinder.job.api.indeed.IndeedJobRequestBuilder;
-import ch.mse.mobop.geojobfinder.job.utils.APIResponsesUtils;
 import ch.mse.mobop.geojobfinder.job.api.CompleteLocation;
 
-public class EntryPointActivity extends AppCompatActivity implements OnMapReadyCallback, LocationListener{
+public class EntryPointActivity extends AppCompatActivity implements OnMapReadyCallback, LocationListener, StoreJobOfferComponent {
 
     private final Location mLastLocation = new Location("");
+    private final Map<Marker, JobOffer> currentJobOffers = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +56,9 @@ public class EntryPointActivity extends AppCompatActivity implements OnMapReadyC
 
         final SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        mapFragment.getMap().setOnMarkerClickListener(this);
+        mapFragment.getMap().setOnInfoWindowClickListener(this);
+
 
         final Criteria locationCriteria = new Criteria();
         final int time     = 10; // mSecond
@@ -90,15 +92,42 @@ public class EntryPointActivity extends AppCompatActivity implements OnMapReadyC
                     if(lon != 0 && lat != 0) {
                         mapFragment.getMap().moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat,lon), 10f));
                         JobAPI indeedAPI = new IndeedJobAPI();
-                        JobRequest req = (JobRequest) IndeedJobRequestBuilder.create(currentLoc, indeedAPI.developerKey).withLimit(100).build();
-                        new APIRequestExecutor(getApplicationContext(), mapFragment).execute(new Tuple<>(indeedAPI, req));
+                        double [] w = new double[]{1D};
+                        final JobRequest req = (JobRequest) IndeedJobRequestBuilder.create(currentLoc, indeedAPI.developerKey).withLimit(100).withRadius(1).build();
+                        new APIRequestExecutor(getApplicationContext(), mapFragment, EntryPointActivity.this).execute(new Tuple<>(indeedAPI, new JobRequest[]{req}));
                     }
-
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         });
+    }
+
+    @Override
+    public void storeJobOffer(Marker m, JobOffer j) {
+        currentJobOffers.put(m, j);
+    }
+
+    @Override
+    public void removeJobOffer(JobOffer j) {
+        if(!currentJobOffers.containsValue(j)) return;
+        for(Map.Entry<Marker, JobOffer> e : currentJobOffers.entrySet()){
+            if(e.getValue().equals(j)) {
+                currentJobOffers.remove(e.getKey());
+                return;
+            }
+        }
+    }
+
+    @Override
+    public JobOffer findJobOfferFromMarker(Marker m) {
+        if(!currentJobOffers.containsKey(m)) return null;
+        for(Map.Entry<Marker, JobOffer> e : currentJobOffers.entrySet()){
+            if(e.getKey().equals(m)) {
+                return e.getValue();
+            }
+        }
+        return null;
     }
 
     @Override
@@ -108,17 +137,30 @@ public class EntryPointActivity extends AppCompatActivity implements OnMapReadyC
     }
 
     @Override
+    public boolean onMarkerClick(Marker marker) {
+        marker.showInfoWindow();
+        return true;
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        marker.hideInfoWindow();
+
+        startActivity(new Intent(this, MainActivity.class));
+    }
+
+    @Override
     public void onLocationChanged(Location location) {
         mLastLocation.setLatitude(location.getLatitude());
         mLastLocation.setLongitude(location.getLongitude());
     }
 
     @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) { }
+    public void onStatusChanged(String provider, int status, Bundle extras) {}
 
     @Override
-    public void onProviderEnabled(String provider) { }
+    public void onProviderEnabled(String provider) {}
 
     @Override
-    public void onProviderDisabled(String provider) { }
+    public void onProviderDisabled(String provider) {}
 }
