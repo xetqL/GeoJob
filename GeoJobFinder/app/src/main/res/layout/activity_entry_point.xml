@@ -40,5 +40,5 @@
         android:layout_below="@id/city"
         android:id="@+id/map"
         tools:context=".MapsActivity"
-        android:name="com.google.android.gms.maps.SupportMapFragment" />
+        android:name="com.google.android.gms.maps.SupportMapFragment"/>
 </RelativeLayout>

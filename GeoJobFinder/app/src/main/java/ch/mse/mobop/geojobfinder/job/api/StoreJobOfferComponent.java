@@ -13,6 +13,9 @@ public interface StoreJobOfferComponent  extends GoogleMap.OnMarkerClickListener
     void removeJobOffer(JobOffer j);
 
     JobOffer findJobOfferFromMarker(Marker m);
+
+    void clearJobOffers();
+
     @Override
     boolean onMarkerClick(Marker marker);
 

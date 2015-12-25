@@ -81,6 +81,7 @@ public class EntryPointActivity extends AppCompatActivity implements OnMapReadyC
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                clearJobOffers();
                 double lon = mLastLocation.getLongitude();
                 double lat = mLastLocation.getLatitude();
                 longitude.setText(String.valueOf(lon));
@@ -97,7 +98,7 @@ public class EntryPointActivity extends AppCompatActivity implements OnMapReadyC
                         new APIRequestExecutor(getApplicationContext(), mapFragment, EntryPointActivity.this).execute(new Tuple<>(indeedAPI, new JobRequest[]{req}));
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.w("GPS", "No GPS value acquired");
                 }
             }
         });
@@ -106,6 +107,12 @@ public class EntryPointActivity extends AppCompatActivity implements OnMapReadyC
     @Override
     public void storeJobOffer(Marker m, JobOffer j) {
         currentJobOffers.put(m, j);
+    }
+
+    @Override
+    public void clearJobOffers() {
+        for(Marker m : currentJobOffers.keySet()) m.remove();
+        currentJobOffers.clear();
     }
 
     @Override
@@ -145,8 +152,17 @@ public class EntryPointActivity extends AppCompatActivity implements OnMapReadyC
     @Override
     public void onInfoWindowClick(Marker marker) {
         marker.hideInfoWindow();
-
-        startActivity(new Intent(this, MainActivity.class));
+        Intent i = new Intent(this, ViewJobActivity.class);
+        JobOffer job = findJobOfferFromMarker(marker);
+        i.putExtra("job_title", job.getJobTitle());
+        i.putExtra("job_company", job.getCompany());
+        i.putExtra("job_snippet",job.getSnippet());
+        i.putExtra("job_uniquekey", job.getJobKey());
+        i.putExtra("job_country", job.getCountry());
+        i.putExtra("job_lat", job.getGPSLocation().getLatitude());
+        i.putExtra("job_lon", job.getGPSLocation().getLongitude());
+        i.putExtra("job_city", job.getLocation().getCity());
+        startActivity(i);
     }
 
     @Override
