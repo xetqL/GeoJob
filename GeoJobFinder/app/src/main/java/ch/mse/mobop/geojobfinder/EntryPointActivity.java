@@ -1,18 +1,25 @@
 package ch.mse.mobop.geojobfinder;
 
+import android.app.AlertDialog;
 import android.content.Context;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -23,6 +30,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,6 +40,8 @@ import ch.mse.mobop.geojobfinder.job.api.JobAPI;
 import ch.mse.mobop.geojobfinder.job.api.JobOffer;
 import ch.mse.mobop.geojobfinder.job.api.JobRequest;
 import ch.mse.mobop.geojobfinder.job.api.StoreJobOfferComponent;
+import ch.mse.mobop.geojobfinder.job.api.indeed.IndeedJobOffer;
+import ch.mse.mobop.geojobfinder.job.utils.GoogleMapUtils;
 import ch.mse.mobop.geojobfinder.job.utils.Tuple;
 import ch.mse.mobop.geojobfinder.job.api.indeed.IndeedCountryCode;
 import ch.mse.mobop.geojobfinder.job.api.indeed.IndeedJobAPI;
@@ -41,6 +52,7 @@ public class EntryPointActivity extends AppCompatActivity implements OnMapReadyC
 
     private final Location mLastLocation = new Location("");
     private final Map<Marker, JobOffer> currentJobOffers = new HashMap<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,47 +71,53 @@ public class EntryPointActivity extends AppCompatActivity implements OnMapReadyC
         mapFragment.getMap().setOnMarkerClickListener(this);
         mapFragment.getMap().setOnInfoWindowClickListener(this);
 
-
-        final Criteria locationCriteria = new Criteria();
-        final int time     = 10; // mSecond
+        final int time = 10; // mSecond
         final int distance = 1; // m.
+        int off = 0;
+        try {
+            off = Settings.Secure.getInt(getContentResolver(), Settings.Secure.LOCATION_MODE);
+        } catch (Settings.SettingNotFoundException e) {
+            e.printStackTrace();
+        }
+        if(off==0){
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Application requires GPS, would you turn on GPS ?")
+                   .setPositiveButton("ok", new DialogInterface.OnClickListener(){
 
+                       @Override
+                       public void onClick(DialogInterface dialog, int which) {
+                           Intent onGPS = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                           startActivity(onGPS);
+                       }
+                   })
+                   .setNegativeButton("no", new DialogInterface.OnClickListener(){
+
+                       @Override
+                       public void onClick(DialogInterface dialog, int which) {
+                           Toast.makeText(getApplicationContext(), "Application is terminating...", Toast.LENGTH_LONG).show();
+                           android.os.Process.killProcess(android.os.Process.myPid());
+                       }
+                   }).create().show();
+        }
         final LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-        for(String p : locationManager.getProviders(true)) Log.d("Available provider", p);
+        for (String p : locationManager.getProviders(true)) Log.d("Available provider", p);
 
-        locationCriteria.setAccuracy(Criteria.ACCURACY_LOW);
-        locationCriteria.setPowerRequirement(Criteria.POWER_LOW);
-        locationCriteria.setSpeedRequired(true);
+        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, time, distance, this);
+        else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, time, distance, this);
+        else
+            locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, time, distance, this);
 
-        String provider = locationManager.getBestProvider(locationCriteria, true);
-
-        Log.d("Location provider", provider);
-
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, time, distance, this);
-        locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, time, distance, this);
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                clearJobOffers();
-                double lon = mLastLocation.getLongitude();
-                double lat = mLastLocation.getLatitude();
-                longitude.setText(String.valueOf(lon));
-                latitude.setText(String.valueOf(lat));
-                //Get address base on location
-                try{
-                    CompleteLocation currentLoc = CompleteLocation.retrieveFromGPS(EntryPointActivity.this.getApplicationContext(), mLastLocation, IndeedCountryCode.class);
-                    city.setText(currentLoc.getCity() + " " + currentLoc.getCountryCode());
-                    if(lon != 0 && lat != 0) {
-                        mapFragment.getMap().moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat,lon), 10f));
-                        JobAPI indeedAPI = new IndeedJobAPI();
-                        double [] w = new double[]{1D};
-                        final JobRequest req = (JobRequest) IndeedJobRequestBuilder.create(currentLoc, indeedAPI.developerKey).withLimit(100).withRadius(1).build();
-                        new APIRequestExecutor(getApplicationContext(), mapFragment, EntryPointActivity.this).execute(new Tuple<>(indeedAPI, new JobRequest[]{req}));
-                    }
-                } catch (Exception e) {
-                    Log.w("GPS", "No GPS value acquired");
-                }
+            clearJobOffers();
+            longitude.setText(String.valueOf(mLastLocation.getLongitude()));
+            latitude.setText(String.valueOf(mLastLocation.getLatitude()));
+            CompleteLocation cLoc = GoogleMapUtils.displayJobsOnMap(mapFragment.getMap(), mLastLocation, getApplicationContext(), EntryPointActivity.this);
+            if(cLoc != null) city.setText(cLoc.toString());
             }
         });
     }
@@ -111,15 +129,15 @@ public class EntryPointActivity extends AppCompatActivity implements OnMapReadyC
 
     @Override
     public void clearJobOffers() {
-        for(Marker m : currentJobOffers.keySet()) m.remove();
+        for (Marker m : currentJobOffers.keySet()) m.remove();
         currentJobOffers.clear();
     }
 
     @Override
     public void removeJobOffer(JobOffer j) {
-        if(!currentJobOffers.containsValue(j)) return;
-        for(Map.Entry<Marker, JobOffer> e : currentJobOffers.entrySet()){
-            if(e.getValue().equals(j)) {
+        if (!currentJobOffers.containsValue(j)) return;
+        for (Map.Entry<Marker, JobOffer> e : currentJobOffers.entrySet()) {
+            if (e.getValue().equals(j)) {
                 currentJobOffers.remove(e.getKey());
                 return;
             }
@@ -128,9 +146,9 @@ public class EntryPointActivity extends AppCompatActivity implements OnMapReadyC
 
     @Override
     public JobOffer findJobOfferFromMarker(Marker m) {
-        if(!currentJobOffers.containsKey(m)) return null;
-        for(Map.Entry<Marker, JobOffer> e : currentJobOffers.entrySet()){
-            if(e.getKey().equals(m)) {
+        if (!currentJobOffers.containsKey(m)) return null;
+        for (Map.Entry<Marker, JobOffer> e : currentJobOffers.entrySet()) {
+            if (e.getKey().equals(m)) {
                 return e.getValue();
             }
         }
@@ -153,15 +171,8 @@ public class EntryPointActivity extends AppCompatActivity implements OnMapReadyC
     public void onInfoWindowClick(Marker marker) {
         marker.hideInfoWindow();
         Intent i = new Intent(this, ViewJobActivity.class);
-        JobOffer job = findJobOfferFromMarker(marker);
-        i.putExtra("job_title", job.getJobTitle());
-        i.putExtra("job_company", job.getCompany());
-        i.putExtra("job_snippet",job.getSnippet());
-        i.putExtra("job_uniquekey", job.getJobKey());
-        i.putExtra("job_country", job.getCountry());
-        i.putExtra("job_lat", job.getGPSLocation().getLatitude());
-        i.putExtra("job_lon", job.getGPSLocation().getLongitude());
-        i.putExtra("job_city", job.getLocation().getCity());
+        IndeedJobOffer job = (IndeedJobOffer) findJobOfferFromMarker(marker);
+        i.putExtra("selected_job", job);
         startActivity(i);
     }
 
@@ -172,11 +183,42 @@ public class EntryPointActivity extends AppCompatActivity implements OnMapReadyC
     }
 
     @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {}
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+    }
 
     @Override
-    public void onProviderEnabled(String provider) {}
+    public void onProviderEnabled(String provider) {
+    }
 
     @Override
-    public void onProviderDisabled(String provider) {}
+    public void onProviderDisabled(String provider) {
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.show_jobs_menu, menu);
+        return true;
+    }
+
+    private <A extends JobOffer> Collection<A> castToConcreteJobOffer(Collection<JobOffer> originalCol, Class<A> cls){
+        Collection<A> rCol = new ArrayList<>();
+        for(JobOffer j : originalCol){
+            rCol.add(cls.cast(j));
+        }
+        return rCol;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.gotoMap:
+                Intent i = new Intent(this, ShowJobsOnMapActivity.class);
+                i.putExtra("last_known_location", mLastLocation);
+                startActivity(i);
+                return true;
+        }
+        return true;
+    }
 }

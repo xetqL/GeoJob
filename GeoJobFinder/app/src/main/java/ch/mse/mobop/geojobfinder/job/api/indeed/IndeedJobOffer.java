@@ -1,6 +1,7 @@
 package ch.mse.mobop.geojobfinder.job.api.indeed;
 
 import android.location.Location;
+import android.os.Parcel;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -24,11 +25,15 @@ import ch.mse.mobop.geojobfinder.job.api.CompleteLocation;
 /**
  * Created by xetqL on 21/12/2015.
  */
-public class IndeedJobOffer extends JobOffer{
+public class IndeedJobOffer extends JobOffer {
     private final String apiLocation = "indeed";
 
     private IndeedJobOffer(String jobKey, CompleteLocation location, String jobTitle, String snippet, String proposalURL, String company) throws MalformedURLException {
         super(UUID.randomUUID(), jobKey, jobTitle, company, location, snippet, new URL(proposalURL));
+    }
+
+    protected IndeedJobOffer(Parcel in) {
+        super(in);
     }
 
     @Override
@@ -75,10 +80,8 @@ public class IndeedJobOffer extends JobOffer{
                 response.getString("url"),
                 response.getString("source")
         );
-
         return res;
     }
-
 
     @Override
     public LatLng getPosition() {
@@ -101,4 +104,32 @@ public class IndeedJobOffer extends JobOffer{
                 ", proposalURL=" + proposalURL +
                 '}';
     }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelable(this.location, 0);
+        dest.writeString(this.jobTitle);
+        dest.writeString(this.snippet);
+        dest.writeString(this.company);
+        dest.writeString(this.jobKey);
+        dest.writeSerializable(this.proposalURL);
+        dest.writeSerializable(this.appUniqueIdentifier);
+    }
+
+
+    public static final Creator<JobOffer> CREATOR = new Creator<JobOffer>() {
+        public JobOffer createFromParcel(Parcel source) {
+            return new IndeedJobOffer(source);
+        }
+
+        public JobOffer[] newArray(int size) {
+            return new JobOffer[size];
+        }
+    };
 }

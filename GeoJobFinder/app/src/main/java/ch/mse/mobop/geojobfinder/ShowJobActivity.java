@@ -38,7 +38,6 @@ public class ShowJobActivity extends AppCompatActivity {
         jLocation.setText(i.getStringExtra("job_city") + " " +countryCode.name() + " "+ countryCode.getCode());
         jSnippet.setText(jobSnippet);
         jobKey = i.getStringExtra("job_uniquekey");
-
         lat = i.getDoubleExtra("job_lat", 46.12);
         lon = i.getDoubleExtra("job_lon", 6.15);
     }

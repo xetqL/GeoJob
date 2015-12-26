@@ -4,6 +4,8 @@ import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -20,12 +22,12 @@ import ch.mse.mobop.geojobfinder.job.api.indeed.IndeedCountryCode;
 /**
  * Created by xetqL on 21/12/2015.
  */
-public class CompleteLocation {
+public class CompleteLocation implements Parcelable {
     private final Location gpsLocation;
     private final CountryCode countryCode;
     private final String city;
 
-    private CompleteLocation(Location gpsLocation, CountryCode countryCode, String city) {
+    public CompleteLocation(Location gpsLocation, CountryCode countryCode, String city) {
         this.gpsLocation = gpsLocation;
         this.countryCode = countryCode;
         this.city = city;
@@ -72,10 +74,34 @@ public class CompleteLocation {
 
     @Override
     public String toString() {
-        return "CompleteLocation{" +
-                "gpsLocation=" + gpsLocation.toString() +
-                ", countryCode=" + countryCode +
-                ", city='" + city + '\'' +
-                '}';
+        return city + " " + countryCode;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelable(this.gpsLocation, 0);
+        dest.writeSerializable(this.countryCode);
+        dest.writeString(this.city);
+    }
+
+    protected CompleteLocation(Parcel in) {
+        this.gpsLocation = in.readParcelable(Location.class.getClassLoader());
+        this.countryCode = (CountryCode) in.readSerializable();
+        this.city = in.readString();
+    }
+
+    public static final Parcelable.Creator<CompleteLocation> CREATOR = new Parcelable.Creator<CompleteLocation>() {
+        public CompleteLocation createFromParcel(Parcel source) {
+            return new CompleteLocation(source);
+        }
+
+        public CompleteLocation[] newArray(int size) {
+            return new CompleteLocation[size];
+        }
+    };
 }

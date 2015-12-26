@@ -1,6 +1,8 @@
 package ch.mse.mobop.geojobfinder.job.api;
 
 import android.location.Location;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -15,7 +17,7 @@ import java.util.UUID;
 /**
  * Created by xetqL on 19/12/2015.
  */
-public abstract class JobOffer implements ClusterItem{
+public abstract class JobOffer implements ClusterItem, Parcelable{
 
     protected final CompleteLocation location;
     protected final String jobTitle, snippet, company, jobKey;
@@ -110,4 +112,15 @@ public abstract class JobOffer implements ClusterItem{
     }
 
     public abstract String getAPILocation(); //get the name of the api that has the job offer
+
+    protected JobOffer(Parcel in) {
+        this.location = in.readParcelable(CompleteLocation.class.getClassLoader());
+        this.jobTitle = in.readString();
+        this.snippet = in.readString();
+        this.company = in.readString();
+        this.jobKey = in.readString();
+        this.proposalURL = (URL) in.readSerializable();
+        this.appUniqueIdentifier = (UUID) in.readSerializable();
+    }
+
 }
