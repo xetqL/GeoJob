@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">GeoJobFinder</string>
+    <string name="app_name">GeoJob</string>
     <string name="title_activity_view_job">ViewJobActivity</string>
     <string name="tag_field">Tags</string>
     <string name="radius_field">Search radius</string>

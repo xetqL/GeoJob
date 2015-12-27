@@ -35,7 +35,7 @@ public class IndeedJobRequestBuilder extends JobRequestBuilder<JobRequest> {
 
     @Override
     public JobRequestBuilder withTags(String... tags) {
-        Joiner join = Joiner.on("AND").skipNulls();
+        Joiner join = Joiner.on("+").skipNulls();
         httpRequest.put("q", join.join(tags));
         return this;
     }

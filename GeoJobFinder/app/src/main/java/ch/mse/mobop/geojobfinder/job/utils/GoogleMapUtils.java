@@ -28,6 +28,7 @@ public class GoogleMapUtils {
         return new MarkerOptions().title(title).position(position).snippet(snippet);
     }
 
+    @Deprecated
     public static CompleteLocation displayJobsOnMap(GoogleMap map, Location bestLastLocation, Context context, StoreJobOfferComponent storeJobOfferComponent) {
 
         double lon = bestLastLocation.getLongitude();
@@ -47,5 +48,12 @@ public class GoogleMapUtils {
             Log.w("GPS", "No GPS value acquired");
         }
         return null;
+    }
+
+    public static void displayRequestsResultsOnMap(Context context, GoogleMap map, CompleteLocation lastKnownLocation, StoreJobOfferComponent storingComponent, Tuple<JobAPI, JobRequest[]>... requests){
+        LatLng ltlg = lastKnownLocation.toLatLng();
+        if(ltlg.latitude != 0 && ltlg.longitude != 0){
+            new APIRequestExecutor(context, map, storingComponent).execute(requests);
+        }
     }
 }

@@ -26,11 +26,20 @@ public class CompleteLocation implements Parcelable {
     private final Location gpsLocation;
     private final CountryCode countryCode;
     private final String city;
+    private final LatLng ltlg;
 
     public CompleteLocation(Location gpsLocation, CountryCode countryCode, String city) {
+        this.ltlg = new LatLng(gpsLocation.getLatitude(), gpsLocation.getLongitude());
         this.gpsLocation = gpsLocation;
         this.countryCode = countryCode;
         this.city = city;
+    }
+
+    protected CompleteLocation(Parcel in) {
+        this.gpsLocation = in.readParcelable(Location.class.getClassLoader());
+        this.ltlg = new LatLng(gpsLocation.getLatitude(), gpsLocation.getLongitude());
+        this.countryCode = (CountryCode) in.readSerializable();
+        this.city = in.readString();
     }
 
     public Location getGpsLocation() {
@@ -69,7 +78,7 @@ public class CompleteLocation implements Parcelable {
     }
 
     public LatLng toLatLng(){
-        return new LatLng(gpsLocation.getLatitude(), gpsLocation.getLongitude());
+        return ltlg;
     }
 
     @Override
@@ -87,12 +96,6 @@ public class CompleteLocation implements Parcelable {
         dest.writeParcelable(this.gpsLocation, 0);
         dest.writeSerializable(this.countryCode);
         dest.writeString(this.city);
-    }
-
-    protected CompleteLocation(Parcel in) {
-        this.gpsLocation = in.readParcelable(Location.class.getClassLoader());
-        this.countryCode = (CountryCode) in.readSerializable();
-        this.city = in.readString();
     }
 
     public static final Parcelable.Creator<CompleteLocation> CREATOR = new Parcelable.Creator<CompleteLocation>() {

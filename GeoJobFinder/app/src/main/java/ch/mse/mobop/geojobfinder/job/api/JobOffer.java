@@ -12,6 +12,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.UUID;
 
 /**
@@ -123,4 +125,12 @@ public abstract class JobOffer implements ClusterItem, Parcelable{
         this.appUniqueIdentifier = (UUID) in.readSerializable();
     }
 
+
+    public static <A extends JobOffer> Collection<A> castToConcreteJobOffer(Collection<JobOffer> originalCol, Class<A> cls){
+        Collection<A> rCol = new ArrayList<>();
+        for(JobOffer j : originalCol){
+            rCol.add(cls.cast(j));
+        }
+        return rCol;
+    }
 }

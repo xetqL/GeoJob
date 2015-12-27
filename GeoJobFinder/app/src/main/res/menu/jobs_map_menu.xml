@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="ch.mse.mobop.geojobfinder.ShowJobsOnMapActivity">
     <item
-        android:id="@+id/searchJob"
+        android:id="@+id/refreshMap"
         android:icon="@drawable/refresh"
         android:title="search job"
         app:showAsAction="always"/>

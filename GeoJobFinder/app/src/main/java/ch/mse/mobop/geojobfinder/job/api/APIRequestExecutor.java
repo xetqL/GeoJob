@@ -6,10 +6,8 @@ package ch.mse.mobop.geojobfinder.job.api;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.SupportMapFragment;
 
 import java.io.IOException;
 import java.util.List;
@@ -34,11 +32,18 @@ public class APIRequestExecutor extends AsyncTask<Tuple<JobAPI,JobRequest[]>, Vo
     protected List<JobOffer> doInBackground(Tuple<JobAPI, JobRequest[]>... params) {
         JobAPI api = params[0].k;
         JobRequest[] requestArray = params[0].v;
+        List<JobOffer> results = null;
         try{
-            return api.retrieveJobOffersFromRequests(requestArray);
+            results = api.retrieveJobOffersFromRequests(requestArray);
+            for(int i = 1; i < params.length; i++){ //proceed all API requests couple
+                api = params[0].k;
+                requestArray = params[0].v;
+                results.addAll(api.retrieveJobOffersFromRequests(requestArray));
+            }
         }catch (IOException e){
             e.printStackTrace();
-            return null;
+        } finally { //finally return the results
+            return results;
         }
     }
 
