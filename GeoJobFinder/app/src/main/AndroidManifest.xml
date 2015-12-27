@@ -39,16 +39,12 @@
 
         <activity
             android:name=".ViewJobActivity"
-            android:label="@string/title_activity_view_job"
-            android:parentActivityName=".EntryPointActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="ch.mse.mobop.geojobfinder.EntryPointActivity" />
         </activity>
 
         <activity android:name=".ShowJobsOnMapActivity"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme"
+            android:launchMode="singleTop">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="ch.mse.mobop.geojobfinder.EntryPointActivity" />

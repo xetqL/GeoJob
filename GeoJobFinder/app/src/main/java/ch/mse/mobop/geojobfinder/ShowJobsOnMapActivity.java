@@ -40,6 +40,8 @@ public class ShowJobsOnMapActivity extends AppCompatActivity implements OnMapRea
         final SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.allJobsMap);
         currentLoc = (Location) i.getParcelableExtra("last_known_location");
         mapFragment.getMapAsync(this);
+        mapFragment.getMap().setOnInfoWindowClickListener(this);
+        mapFragment.getMap().setOnMarkerClickListener(this);
     }
 
     @Override
@@ -94,6 +96,7 @@ public class ShowJobsOnMapActivity extends AppCompatActivity implements OnMapRea
         marker.hideInfoWindow();
         Intent i = new Intent(this, ViewJobActivity.class);
         IndeedJobOffer job = (IndeedJobOffer) findJobOfferFromMarker(marker);
+        if(job == null) return;
         i.putExtra("selected_job", job);
         startActivity(i);
     }

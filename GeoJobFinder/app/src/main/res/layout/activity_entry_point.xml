@@ -7,39 +7,67 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="ch.mse.mobop.geojobfinder.EntryPointActivity"
-    >
+    tools:context="ch.mse.mobop.geojobfinder.EntryPointActivity">
 
-    <Button android:id="@+id/btn_search"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Search near jobs"/>
-
-    <TextView android:id="@+id/latitude"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/btn_search"
-        android:text="latitude" />
-
-    <TextView android:id="@+id/longitude"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/latitude"
-        android:text="longitude"/>
-
-    <TextView android:id="@+id/city"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/longitude"
-        android:text="City"/>
-
-    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="30dp"
-        android:layout_below="@id/city"
-        android:id="@+id/map"
-        tools:context=".MapsActivity"
-        android:name="com.google.android.gms.maps.SupportMapFragment"/>
+        android:orientation="vertical"
+        android:weightSum="1">
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="273dp"
+            android:layout_height="205dp"
+            android:layout_gravity="center"
+            android:layout_marginBottom="70dp"
+            android:layout_marginTop="30px"
+            android:src="@drawable/logo3"
+            android:backgroundTint="#00ffffff" />
+
+        <TextView
+            style="@style/FieldStyle"
+            android:text="@string/tag_field" />
+
+        <EditText
+            android:id="@+id/tags"
+            android:layout_marginBottom="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="2"
+            android:inputType="textLongMessage" />
+
+        <TextView
+            style="@style/FieldStyle"
+            android:text="@string/radius_field" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:weightSum="1">
+
+            <TextView
+                android:id="@+id/radiusValue"
+                style="@style/FieldStyle"
+                android:layout_marginLeft="20px"
+                android:layout_marginTop="20px"
+                android:layout_marginRight="20px"
+                android:layout_marginBottom="20px"
+                android:text="@string/radius_start_value" />
+
+            <SeekBar xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/radius"
+                android:layout_marginTop="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminate="false"
+                android:max="50"
+
+                android:progress="1"
+                android:thumb="@drawable/abc_switch_thumb_material" />
+
+        </LinearLayout>
+    </LinearLayout>
+
 </RelativeLayout>
