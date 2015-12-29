@@ -30,6 +30,7 @@ import ch.mse.mobop.geojobfinder.job.utils.APIResponsesUtils;
  */
 public class IndeedJobAPI extends JobAPI {
     public static final String developeryKey = "958671519160857";
+    public static final int JOB_OFFER_LIMIT_BY_REQUEST = 25;
 
     public IndeedJobAPI(String developerKey) {
         super(developerKey);

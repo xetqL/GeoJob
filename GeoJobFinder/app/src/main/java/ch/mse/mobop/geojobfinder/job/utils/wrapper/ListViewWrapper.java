@@ -3,6 +3,8 @@ package ch.mse.mobop.geojobfinder.job.utils.wrapper;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.baoyz.swipemenulistview.SwipeMenuAdapter;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,7 +22,7 @@ public class ListViewWrapper implements JobDisplayerWrapper<ListView, Integer> {
 
     @Override
     public Integer add(JobOffer offer) {
-        ArrayAdapter<JobOffer> jobOfferArrayAdapter = (ArrayAdapter<JobOffer>) displayer.getAdapter();
+        ArrayAdapter<JobOffer> jobOfferArrayAdapter = (ArrayAdapter<JobOffer>) ((SwipeMenuAdapter) displayer.getAdapter()).getWrappedAdapter();
         jobOfferArrayAdapter.add(offer);
         jobOfferArrayAdapter.notifyDataSetChanged();
         return jobOfferArrayAdapter.getCount() - 1;
@@ -29,7 +31,7 @@ public class ListViewWrapper implements JobDisplayerWrapper<ListView, Integer> {
     @Override
     public Map<Integer, JobOffer> addAll(JobOffer... offers) {
         Map<Integer, JobOffer> r = new HashMap<>();
-        ArrayAdapter<JobOffer> jobOfferArrayAdapter = (ArrayAdapter<JobOffer>) displayer.getAdapter();
+        ArrayAdapter<JobOffer> jobOfferArrayAdapter = (ArrayAdapter<JobOffer>) ((SwipeMenuAdapter) displayer.getAdapter()).getWrappedAdapter();
         int count;
         for(JobOffer offer : offers) {
             count = jobOfferArrayAdapter.getCount();
@@ -42,14 +44,14 @@ public class ListViewWrapper implements JobDisplayerWrapper<ListView, Integer> {
 
     @Override
     public void remove(Integer element) {
-        ArrayAdapter<JobOffer> jobOfferArrayAdapter = (ArrayAdapter<JobOffer>) displayer.getAdapter();
+        ArrayAdapter<JobOffer> jobOfferArrayAdapter = (ArrayAdapter<JobOffer>) ((SwipeMenuAdapter) displayer.getAdapter()).getWrappedAdapter();
         jobOfferArrayAdapter.remove( jobOfferArrayAdapter.getItem(element)  );
         jobOfferArrayAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void clear() {
-        ArrayAdapter<JobOffer> jobOfferArrayAdapter = (ArrayAdapter<JobOffer>) displayer.getAdapter();
+        ArrayAdapter<JobOffer> jobOfferArrayAdapter = (ArrayAdapter<JobOffer>) ((SwipeMenuAdapter) displayer.getAdapter()).getWrappedAdapter();
         jobOfferArrayAdapter.clear();
     }
 

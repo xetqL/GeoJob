@@ -53,6 +53,12 @@ public class IndeedJobRequestBuilder extends JobRequestBuilder<JobRequest> {
     }
 
     @Override
+    public JobRequestBuilder startFrom(int startFrom) {
+        httpRequest.put("start", String.valueOf(startFrom));
+        return this;
+    }
+
+    @Override
     public JobRequest build() {
         StringBuilder request = new StringBuilder(apiUrl);
         for (Map.Entry<String, String> param : httpRequest.entrySet()){
@@ -75,4 +81,5 @@ public class IndeedJobRequestBuilder extends JobRequestBuilder<JobRequest> {
     public static JobRequestBuilder create(CompleteLocation location, String developerKey){
         return new IndeedJobRequestBuilder(location.getCountryCode(), location.getCity(), developerKey);
     }
+
 }

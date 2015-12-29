@@ -16,6 +16,8 @@ public abstract class JobRequestBuilder<A> {
 
     public abstract JobRequestBuilder withRadius(int radius);
 
+    public abstract JobRequestBuilder startFrom(int startFrom);
+
     public abstract A build();
 
     public abstract void clear();
