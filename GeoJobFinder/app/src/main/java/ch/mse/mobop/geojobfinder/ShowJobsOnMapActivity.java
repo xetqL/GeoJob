@@ -7,8 +7,10 @@ import android.content.IntentFilter;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.DropBoxManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -18,10 +20,12 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import ch.mse.mobop.geojobfinder.job.api.CompleteLocation;
@@ -47,7 +51,7 @@ public class ShowJobsOnMapActivity extends AppCompatActivity implements OnMapRea
     private String[] tags;
     private int radius;
 
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() { //refresh map when location is updated from main activity
+    private final BroadcastReceiver mReceiverRefreshMap = new BroadcastReceiver() { //refresh map when location is updated from main activity
         @Override
         public void onReceive(Context context, Intent intent) {
             currentLoc = (Location) intent.getParcelableExtra("last_known_location");
@@ -56,23 +60,46 @@ public class ShowJobsOnMapActivity extends AppCompatActivity implements OnMapRea
     };
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        if (menuItem.getItemId() == android.R.id.home) {
+            finish();
+        }
+        return super.onOptionsItemSelected(menuItem);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_jobs_on_map);
-        LocalBroadcastManager.getInstance(ShowJobsOnMapActivity.this).registerReceiver(mReceiver, new IntentFilter("location_update"));
         Intent i = getIntent();
-        final int time = 600;           // mSecond
-        final int distance = 150;       // m.
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         final SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.allJobsMap);
-        currentLoc = (Location) i.getParcelableExtra("last_known_location");
-        radius = (int) i.getIntExtra("request_radius", 1);
-        tags = i.getStringArrayExtra("request_tags");
         mapFragment.getMapAsync(this);
         mapFragment.getMap().setOnInfoWindowClickListener(this);
         mapFragment.getMap().setOnMarkerClickListener(this);
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         gmap = new GoogleMapWrapper(mapFragment.getMap());
-        refreshMap(gmap, currentLoc, radius, tags);
+
+        switch (getCallingActivity().getClassName()) {
+            case "ch.mse.mobop.geojobfinder.EntryPointActivity":
+                LocalBroadcastManager.getInstance(ShowJobsOnMapActivity.this).registerReceiver(mReceiverRefreshMap, new IntentFilter("location_update"));
+                currentLoc = (Location) i.getParcelableExtra("last_known_location");
+                radius = (int) i.getIntExtra("request_radius", 1);
+                tags = i.getStringArrayExtra("request_tags");
+                refreshMap(gmap, currentLoc, radius, tags);
+                break;
+            case "ch.mse.mobop.geojobfinder.ListJobsActivity":
+                List<JobOffer> jobs = i.getParcelableArrayListExtra("selected_jobs");
+                currentLoc = (Location) i.getParcelableExtra("last_known_location");
+                currentJobOffers = gmap.addAll(jobs);
+                LatLng ltlg = new LatLng(currentLoc.getLatitude(), currentLoc.getLongitude());
+                gmap.getWrappedObject().addMarker(GoogleMapUtils.getMarkerOptions("Me", ltlg, "My position").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                gmap.getWrappedObject().moveCamera(CameraUpdateFactory.newLatLngZoom(ltlg, 14f));
+                break;
+            default:
+                finish();
+        }
+
     }
 
     @Override
@@ -127,22 +154,7 @@ public class ShowJobsOnMapActivity extends AppCompatActivity implements OnMapRea
         startActivity(i);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.jobs_map_menu, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.refreshMap:
-                currentLoc = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                refreshMap(gmap, currentLoc, radius, tags);
-        }
-        return super.onOptionsItemSelected(item);
-    }
 
     @Override
     public void set(Map<Marker, JobOffer> data) {

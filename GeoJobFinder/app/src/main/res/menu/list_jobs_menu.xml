@@ -2,10 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="ch.mse.mobop.geojobfinder.ShowJobsOnMapActivity">
+    tools:context="ch.mse.mobop.geojobfinder.EntryPointActivity">
+
     <item
-        android:id="@+id/refreshMap"
-        android:icon="@drawable/refresh"
-        android:title="search job"
+        android:id="@+id/switchToMap"
+        android:icon="@drawable/maps_icon"
+        android:title="go to map"
         app:showAsAction="always"/>
 </menu>

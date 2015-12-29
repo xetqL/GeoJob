@@ -6,6 +6,7 @@ import android.widget.ListView;
 import com.baoyz.swipemenulistview.SwipeMenuAdapter;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import ch.mse.mobop.geojobfinder.job.api.JobOffer;
@@ -29,7 +30,7 @@ public class ListViewWrapper implements JobDisplayerWrapper<ListView, Integer> {
     }
 
     @Override
-    public Map<Integer, JobOffer> addAll(JobOffer... offers) {
+    public Map<Integer, JobOffer> addAll(List<JobOffer> offers) {
         Map<Integer, JobOffer> r = new HashMap<>();
         ArrayAdapter<JobOffer> jobOfferArrayAdapter = (ArrayAdapter<JobOffer>) ((SwipeMenuAdapter) displayer.getAdapter()).getWrappedAdapter();
         int count;

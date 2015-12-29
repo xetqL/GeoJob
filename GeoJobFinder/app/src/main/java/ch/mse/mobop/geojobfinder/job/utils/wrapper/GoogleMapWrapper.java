@@ -4,6 +4,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import ch.mse.mobop.geojobfinder.job.api.JobOffer;
@@ -25,7 +26,7 @@ public class GoogleMapWrapper implements JobDisplayerWrapper<GoogleMap, Marker> 
     }
 
     @Override
-    public Map<Marker, JobOffer> addAll(JobOffer... offers) {
+    public Map<Marker, JobOffer> addAll(List<JobOffer> offers) {
         Map<Marker, JobOffer> r = new HashMap<>();
         for(JobOffer j : offers)
             r.put( add(j), j);

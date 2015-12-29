@@ -1,5 +1,6 @@
 package ch.mse.mobop.geojobfinder.job.utils.wrapper;
 
+import java.util.List;
 import java.util.Map;
 
 import ch.mse.mobop.geojobfinder.job.api.JobOffer;
@@ -9,7 +10,7 @@ import ch.mse.mobop.geojobfinder.job.api.JobOffer;
  */
 public interface JobDisplayerWrapper<W, R> {
     R add(JobOffer offer);
-    Map<R, JobOffer> addAll(JobOffer... offers);
+    Map<R, JobOffer> addAll(List<JobOffer> offers);
     void remove(R element);
     void clear();
     W getWrappedObject();

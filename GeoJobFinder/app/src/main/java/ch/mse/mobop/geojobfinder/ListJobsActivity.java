@@ -7,9 +7,14 @@ import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -22,7 +27,6 @@ import com.baoyz.swipemenulistview.SwipeMenuListView.OnMenuItemClickListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import ch.mse.mobop.geojobfinder.job.api.APIRequestExecutor;
@@ -67,28 +71,61 @@ public class ListJobsActivity extends AppCompatActivity implements StoreJobOffer
 
             @Override
             public void create(SwipeMenu menu) {
-                // create "delete" item
+                // create "map" item
                 SwipeMenuItem deleteItem = new SwipeMenuItem(getApplicationContext());
                 // set item background
-                deleteItem.setBackground(new ColorDrawable(Color.rgb(0xC9, 0xC9, 0xCE)));
+                deleteItem.setBackground(new ColorDrawable(Color.rgb(0x42, 0xA7, 0x78)));
                 // set item width
                 deleteItem.setWidth(dp2px(90));
                 // set a icon
-                deleteItem.setIcon(android.R.drawable.ic_menu_send);
+                deleteItem.setIcon(R.drawable.maps_icon);
                 // add to menu
                 menu.addMenuItem(deleteItem);
+
+
+                // create "send" item
+                SwipeMenuItem applyItem = new SwipeMenuItem(getApplicationContext());
+                // set item background
+                applyItem.setBackground(new ColorDrawable(Color.rgb(0x41, 0x71, 0xA7)));
+                // set item width
+                applyItem.setWidth(dp2px(90));
+                // set a icon
+                applyItem.setIcon(android.R.drawable.ic_menu_send);
+                // add to menu
+                menu.addMenuItem(applyItem);
+
             }
         };
-
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                ((SwipeMenuListView) parent).smoothOpenMenu(position);
+            }
+        });
         listView.setMenuCreator(creator);
 
         listView.setOnMenuItemClickListener(new OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
+                IndeedJobOffer job;
+                Intent i;
+
                 switch (index) {
+
                     case 0:
-                        IndeedJobOffer job = (IndeedJobOffer) findJobOfferFromIndex(position);
-                        Intent i = new Intent(ListJobsActivity.this, ViewJobOnWebActivity.class);
+                        job = (IndeedJobOffer) findJobOfferFromIndex(position);
+                        i = new Intent(ListJobsActivity.this, ShowJobsOnMapActivity.class);
+                        if (job == null) return true;
+                        ArrayList<JobOffer> l = new ArrayList<JobOffer>();
+                        l.add(job);
+                        i.putParcelableArrayListExtra("selected_jobs", l);
+                        i.putExtra("last_known_location", currentLoc);
+                        startActivityForResult(i, 0);
+                        break;
+
+                    case 1:
+                        job = (IndeedJobOffer) findJobOfferFromIndex(position);
+                        i = new Intent(ListJobsActivity.this, ViewJobOnWebActivity.class);
                         if (job == null) return true;
                         i.putExtra("selected_job", job);
                         startActivity(i);
@@ -116,6 +153,27 @@ public class ListJobsActivity extends AppCompatActivity implements StoreJobOffer
         } finally {
 
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.list_jobs_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Intent i;
+        switch (item.getItemId()) {
+            case R.id.switchToMap:
+                i = new Intent(this, ShowJobsOnMapActivity.class);
+                i.putParcelableArrayListExtra("selected_jobs", new ArrayList<JobOffer>(currentJobOffers.values()));
+                i.putExtra("last_known_location", currentLoc);
+                startActivityForResult(i, 0);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
