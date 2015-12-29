@@ -54,7 +54,7 @@ public class EntryPointActivity extends AppCompatActivity implements LocationLis
                 if (progress < LIMIT) {
                     seekBar.setProgress(LIMIT);
                 }else {
-                    radiusValue.setText(String.valueOf(progress));
+                    radiusValue.setText(String.valueOf(progress)+" km");
                 }
             }
             @Override
@@ -95,7 +95,6 @@ public class EntryPointActivity extends AppCompatActivity implements LocationLis
                        }
                    }).create().show();
         } else {
-
             waitOnGPSDialog = ProgressDialog.show(EntryPointActivity.this, "Retrieving GPS position", "Please wait...", true);
         }
 
