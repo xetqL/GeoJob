@@ -54,7 +54,7 @@ public class EntryPointActivity extends AppCompatActivity implements LocationLis
                 if (progress < LIMIT) {
                     seekBar.setProgress(LIMIT);
                 }else {
-                    radiusValue.setText(String.valueOf(progress)+" km");
+                    radiusValue.setText(String.valueOf(progress)+" km\t\t");
                 }
             }
             @Override
