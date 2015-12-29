@@ -1,59 +1,42 @@
 package ch.mse.mobop.geojobfinder.job.utils;
 
 import android.content.Context;
-import android.location.Location;
-import android.util.Log;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.Random;
 
 import ch.mse.mobop.geojobfinder.job.api.APIRequestExecutor;
 import ch.mse.mobop.geojobfinder.job.api.CompleteLocation;
 import ch.mse.mobop.geojobfinder.job.api.JobAPI;
+import ch.mse.mobop.geojobfinder.job.api.JobOffer;
 import ch.mse.mobop.geojobfinder.job.api.JobRequest;
 import ch.mse.mobop.geojobfinder.job.api.StoreJobOfferComponent;
-import ch.mse.mobop.geojobfinder.job.api.indeed.IndeedCountryCode;
-import ch.mse.mobop.geojobfinder.job.api.indeed.IndeedJobAPI;
-import ch.mse.mobop.geojobfinder.job.api.indeed.IndeedJobRequestBuilder;
+import ch.mse.mobop.geojobfinder.job.utils.wrapper.GoogleMapWrapper;
 
 /**
  * Created by xetqL on 24/12/2015.
  */
 public class GoogleMapUtils {
 
+    private static final Random rand = new Random();
+
     public static MarkerOptions getMarkerOptions(String title, LatLng position, String snippet){
         return new MarkerOptions().title(title).position(position).snippet(snippet);
     }
 
-    @Deprecated
-    public static CompleteLocation displayJobsOnMap(GoogleMap map, Location bestLastLocation, Context context, StoreJobOfferComponent storeJobOfferComponent) {
-
-        double lon = bestLastLocation.getLongitude();
-        double lat = bestLastLocation.getLatitude();
-        //Get address based on location
-        try {
-            CompleteLocation currentLoc = CompleteLocation.retrieveFromGPS(context, bestLastLocation, IndeedCountryCode.class);
-            if (lon != 0 && lat != 0) {
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lon), 12f));
-                final JobAPI indeedAPI = new IndeedJobAPI();
-                final JobRequest req = (JobRequest) IndeedJobRequestBuilder.create(currentLoc, indeedAPI.developerKey).withLimit(100).withRadius(1).build();
-                new APIRequestExecutor(context, map, storeJobOfferComponent).execute(new Tuple<>(indeedAPI, new JobRequest[]{req}));
-                return currentLoc;
-            }
-            return null;
-        } catch (Exception e) {
-            Log.w("GPS", "No GPS value acquired");
-        }
-        return null;
+    public static MarkerOptions nextMarkerOptions(JobOffer offer){
+        double offsetX = rand.nextInt(100) / 180000D, offsetY = rand.nextInt(100) / 180000D;
+        return new MarkerOptions().title(offer.getJobTitle()).position(offer.getLocationAsLatLng(offsetX, offsetY)).snippet( offer.getSnippet() );
     }
 
-    public static void displayRequestsResultsOnMap(Context context, GoogleMap map, CompleteLocation lastKnownLocation, StoreJobOfferComponent storingComponent, Tuple<JobAPI, JobRequest[]>... requests){
+    public static void displayRequestsResultsOnMap(Context context, GoogleMapWrapper map, CompleteLocation lastKnownLocation, StoreJobOfferComponent<Marker> storingComponent, Tuple<JobAPI, JobRequest[]>... requests){
         LatLng ltlg = lastKnownLocation.toLatLng();
         if(ltlg.latitude != 0 && ltlg.longitude != 0){
-            new APIRequestExecutor(context, map, storingComponent).execute(requests);
+            new APIRequestExecutor<GoogleMap, Marker>(context, map, storingComponent).execute(requests);
         }
     }
 }

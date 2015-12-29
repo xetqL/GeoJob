@@ -1,7 +1,4 @@
-package ch.mse.mobop.geojobfinder.job.utils;
-
-import java.util.Arrays;
-import java.util.List;
+package ch.mse.mobop.geojobfinder.job.utils.predicate;
 
 /**
  * Created by xetqL on 19/12/2015.

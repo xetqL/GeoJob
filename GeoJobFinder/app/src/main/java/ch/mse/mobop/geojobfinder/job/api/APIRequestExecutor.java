@@ -7,40 +7,36 @@ package ch.mse.mobop.geojobfinder.job.api;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import com.google.android.gms.maps.GoogleMap;
-
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import ch.mse.mobop.geojobfinder.job.utils.GoogleMapUtils;
+import ch.mse.mobop.geojobfinder.job.utils.wrapper.JobDisplayerWrapper;
 import ch.mse.mobop.geojobfinder.job.utils.Tuple;
 
-public class APIRequestExecutor extends AsyncTask<Tuple<JobAPI,JobRequest[]>, Void, List<JobOffer>> {
-    public final GoogleMap googleMap;
+public class APIRequestExecutor<W, A> extends AsyncTask<Tuple<JobAPI, JobRequest[]>, Void, List<JobOffer>> {
+    public final JobDisplayerWrapper<W, A> displayerWrapper;
     public final Context context;
-    public final StoreJobOfferComponent markerClickListener;
+    public final StoreJobOfferComponent<A> storingComponent;
     private static final Random rand = new Random();
 
-    public APIRequestExecutor(Context context, GoogleMap googleMap, StoreJobOfferComponent markerClickListener) {
-        this.googleMap = googleMap;
+    public APIRequestExecutor(Context context, JobDisplayerWrapper<W, A> displayerWrapper, StoreJobOfferComponent<A> storingComponent) {
+        this.displayerWrapper = displayerWrapper;
         this.context = context;
-        this.markerClickListener = markerClickListener;
+        this.storingComponent = storingComponent;
     }
 
     @Override
     protected List<JobOffer> doInBackground(Tuple<JobAPI, JobRequest[]>... params) {
-        JobAPI api = params[0].k;
-        JobRequest[] requestArray = params[0].v;
-        List<JobOffer> results = null;
-        try{
-            results = api.retrieveJobOffersFromRequests(requestArray);
-            for(int i = 1; i < params.length; i++){ //proceed all API requests couple
-                api = params[0].k;
-                requestArray = params[0].v;
-                results.addAll(api.retrieveJobOffersFromRequests(requestArray));
+        List<JobOffer> results = new ArrayList<>();
+        try {
+            for (Tuple<JobAPI, JobRequest[]> t : params) {
+                JobAPI api = t.k;
+                JobRequest[] requestArray = t.v;
+                results.addAll( api.retrieveJobOffersFromRequests(requestArray) );
             }
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         } finally { //finally return the results
             return results;
@@ -49,12 +45,8 @@ public class APIRequestExecutor extends AsyncTask<Tuple<JobAPI,JobRequest[]>, Vo
 
     @Override
     protected void onPostExecute(List<JobOffer> result) {
-        for(JobOffer offer : result){
-            double offsetX = rand.nextInt(100) / 180000D, offsetY = rand.nextInt(100) / 180000D;
-            markerClickListener.storeJobOffer(
-                    googleMap.addMarker(GoogleMapUtils.getMarkerOptions(offer.getJobTitle(), offer.getLocationAsLatLng(offsetX, offsetY), offer.getSnippet())),
-                    offer
-            );
+        for (JobOffer offer : result) {
+            storingComponent.storeJobOffer( displayerWrapper.add(offer), offer );
         }
         super.onPostExecute(result);
     }

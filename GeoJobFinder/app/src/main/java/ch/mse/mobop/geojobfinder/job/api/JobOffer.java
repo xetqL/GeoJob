@@ -125,12 +125,16 @@ public abstract class JobOffer implements ClusterItem, Parcelable{
         this.appUniqueIdentifier = (UUID) in.readSerializable();
     }
 
-
     public static <A extends JobOffer> Collection<A> castToConcreteJobOffer(Collection<JobOffer> originalCol, Class<A> cls){
         Collection<A> rCol = new ArrayList<>();
         for(JobOffer j : originalCol){
             rCol.add(cls.cast(j));
         }
         return rCol;
+    }
+
+    @Override
+    public String toString() {
+        return jobTitle;
     }
 }

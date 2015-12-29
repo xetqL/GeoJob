@@ -94,19 +94,6 @@ public class IndeedJobOffer extends JobOffer {
     }
 
     @Override
-    public String toString() {
-        return "IndeedJobOffer{" +
-                "location=" + location +
-                ", jobTitle='" + jobTitle + '\'' +
-                ", apiLocation='" + apiLocation + '\'' +
-                ", snippet='" + snippet + '\'' +
-                ", company='" + company + '\'' +
-                ", proposalURL=" + proposalURL +
-                '}';
-    }
-
-
-    @Override
     public int describeContents() {
         return 0;
     }

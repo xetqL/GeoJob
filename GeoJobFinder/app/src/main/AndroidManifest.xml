@@ -15,7 +15,6 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light">
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBgRpcxWC_UDqIvfThMHw3FjUKoH4b310M" />
@@ -39,16 +38,29 @@
 
         <activity
             android:name=".ViewJobActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        </activity>
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
-        <activity android:name=".ShowJobsOnMapActivity"
-            android:theme="@style/AppTheme"
-            android:launchMode="singleTop">
+        <activity
+            android:name=".ShowJobsOnMapActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="ch.mse.mobop.geojobfinder.EntryPointActivity" />
         </activity>
+
+        <activity
+            android:name=".ListJobsActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ch.mse.mobop.geojobfinder.EntryPointActivity" />
+        </activity>
+
+        <activity android:name=".ViewJobOnWebActivity"
+            android:theme="@style/AppTheme"
+
+            ></activity>
     </application>
 
 </manifest>

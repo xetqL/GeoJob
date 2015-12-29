@@ -9,7 +9,9 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -20,6 +22,7 @@ import android.widget.Toast;
 
 import org.apache.commons.lang3.text.StrTokenizer;
 
+import java.util.List;
 import java.util.StringTokenizer;
 
 public class EntryPointActivity extends AppCompatActivity implements LocationListener{
@@ -57,7 +60,7 @@ public class EntryPointActivity extends AppCompatActivity implements LocationLis
             public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
-        final int time = 600;           // mSecond
+        final int time = 5;           // mSecond
         final int distance = 150;       // m.
         int off = 0;
         // Check if GPS is enabled
@@ -88,7 +91,6 @@ public class EntryPointActivity extends AppCompatActivity implements LocationLis
                    }).create().show();
         }
         final LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, time, distance, this);
         locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, time, distance, this);
     }
@@ -97,6 +99,8 @@ public class EntryPointActivity extends AppCompatActivity implements LocationLis
     public void onLocationChanged(Location location) {
         mLastLocation.setLatitude(location.getLatitude());
         mLastLocation.setLongitude(location.getLongitude());
+        Intent intent = new Intent("location_update").putExtra("last_known_location", mLastLocation);
+        LocalBroadcastManager.getInstance(EntryPointActivity.this).sendBroadcast(intent);
     }
 
     @Override
@@ -122,16 +126,25 @@ public class EntryPointActivity extends AppCompatActivity implements LocationLis
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
+        String rawTags = editTags.getText().toString();
+        StrTokenizer st = new StrTokenizer(rawTags, ' ');
+        st.setIgnoreEmptyTokens(true);
+        Intent i;
         switch (item.getItemId()) {
             case R.id.gotoMap:
-                Intent i = new Intent(this, ShowJobsOnMapActivity.class);
+                i = new Intent(this, ShowJobsOnMapActivity.class);
                 i.putExtra("last_known_location", mLastLocation);
                 i.putExtra("request_radius", sb.getProgress());
-                String rawTags = editTags.getText().toString();
-                StrTokenizer st = new StrTokenizer(rawTags, ' ');
-                st.setIgnoreEmptyTokens(true);
                 i.putExtra("request_tags", st.getTokenArray());
                 startActivity(i);
+                break;
+            case R.id.searchJob:
+                i = new Intent(this, ListJobsActivity.class);
+                i.putExtra("last_known_location", mLastLocation);
+                i.putExtra("request_radius", sb.getProgress());
+                i.putExtra("request_tags", st.getTokenArray());
+                startActivity(i);
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
