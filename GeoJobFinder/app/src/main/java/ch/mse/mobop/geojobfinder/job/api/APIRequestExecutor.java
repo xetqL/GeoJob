@@ -6,6 +6,8 @@ package ch.mse.mobop.geojobfinder.job.api;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.support.design.widget.Snackbar;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;

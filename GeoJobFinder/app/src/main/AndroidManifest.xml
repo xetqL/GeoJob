@@ -14,7 +14,9 @@
         android:icon="@drawable/logo3_cut"
         android:label="@string/app_name"
         android:supportsRtl="true"
+
         android:theme="@style/Theme.AppCompat.Light">
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBgRpcxWC_UDqIvfThMHw3FjUKoH4b310M" />
@@ -22,7 +24,8 @@
         <activity
             android:name=".EntryPointActivity"
             android:launchMode="singleTop"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

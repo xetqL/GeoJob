@@ -82,7 +82,6 @@ public class ListJobsActivity extends AppCompatActivity implements StoreJobOffer
                 // add to menu
                 menu.addMenuItem(deleteItem);
 
-
                 // create "send" item
                 SwipeMenuItem applyItem = new SwipeMenuItem(getApplicationContext());
                 // set item background
@@ -109,9 +108,7 @@ public class ListJobsActivity extends AppCompatActivity implements StoreJobOffer
             public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
                 IndeedJobOffer job;
                 Intent i;
-
                 switch (index) {
-
                     case 0:
                         job = (IndeedJobOffer) findJobOfferFromIndex(position);
                         i = new Intent(ListJobsActivity.this, ShowJobsOnMapActivity.class);
@@ -135,7 +132,7 @@ public class ListJobsActivity extends AppCompatActivity implements StoreJobOffer
                 return false;
             }
         });
-
+        listView.setEmptyView( (View) findViewById(R.id.empty) );
         listView.setAdapter(new ArrayAdapter<JobOffer>(getApplicationContext(), R.layout.row, R.id.text, new ArrayList<JobOffer>()));
         listView.setOnScrollListener(this);
         jobList = new ListViewWrapper((ListView) listView);
@@ -189,7 +186,6 @@ public class ListJobsActivity extends AppCompatActivity implements StoreJobOffer
     public void onScrollStateChanged(AbsListView view, int scrollState) {
         authorizedToRetrieveSeveralJobOffers = true;
     }
-
 
     @Override
     public void storeJobOffer(Integer m, JobOffer j) {
