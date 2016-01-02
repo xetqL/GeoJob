@@ -33,16 +33,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ShowJobActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="ch.mse.mobop.geojobfinder.EntryPointActivity" />
-        </activity>
-
-        <activity
-            android:name=".ViewJobActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-
         <activity
             android:name=".ShowJobsOnMapActivity"
             android:launchMode="singleTop"
