@@ -1,5 +1,2 @@
-# MobOpProject
-
-Mobile Operating system project.
-Geo Job Finder is an application that levarages GPS location to search close jobs. 
-
+# GeoJob
+Geo Job Finder is an application that levarages GPS location to look for jobs close to you. 
